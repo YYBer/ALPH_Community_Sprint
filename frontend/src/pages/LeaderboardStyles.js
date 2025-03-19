@@ -18,7 +18,7 @@ export const LeaderboardTable = styled.div`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-const TableHeader = styled.div`
+export const TableHeader = styled.div`
   display: grid;
   grid-template-columns: 0.5fr 2fr 1fr;
   padding: 15px;
