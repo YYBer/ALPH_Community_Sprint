@@ -138,7 +138,7 @@ const processSubmission = async (ctx, twitterUrl) => {
 
 // Bot commands
 bot.start((ctx) => {
-  ctx.reply('Welcome to the Competition Recorder! Share your Twitter posts with me to participate.');
+  ctx.reply('Welcome to the Alph Rankify! Share your Twitter posts with me to participate.');
 });
 
 bot.help((ctx) => {
