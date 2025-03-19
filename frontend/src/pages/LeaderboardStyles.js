@@ -18,13 +18,17 @@ export const LeaderboardTable = styled.div`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-export const TableHeader = styled.div`
+const TableHeader = styled.div`
   display: grid;
   grid-template-columns: 0.5fr 2fr 1fr;
   padding: 15px;
-  background-color: ${props => props.theme.isDark ? '#3c3c3c' : '#f0f0f0'};
+  background-color: ${props => props.theme === 'dark' ? '#3c3c3c' : '#f0f0f0'};
   font-weight: bold;
-  border-bottom: 1px solid ${props => props.theme.isDark ? '#444' : '#ddd'};
+  border-bottom: 1px solid ${props => props.theme === 'dark' ? '#444' : '#ddd'};
+  & > div:last-child {
+    text-align: right;
+    padding-right: 15px;
+  }
 `;
 
 export const TableRow = styled.div`
