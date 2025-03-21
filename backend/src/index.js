@@ -137,8 +137,9 @@ const processSubmission = async (ctx, twitterUrl) => {
 };
 
 // Bot commands
+// Updated welcome message
 bot.start((ctx) => {
-  ctx.reply('Welcome to the Alph Rankify! Share your Twitter posts with me to participate.');
+  ctx.reply('Alephium ambassadors, welcome! \nYou can share your tweet post URL with me, or click t.me/Alph_Rankify_Bot/Ra01 to see the current rankings and points.');
 });
 
 bot.help((ctx) => {
