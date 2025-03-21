@@ -173,9 +173,9 @@ function InvitePage({ theme, telegramUser }) {
           Invite your friends to join the competition! When they start posting, you'll receive 10% of all the points they generate.
         </InfoText>
         
-        <RemainingInvites theme={theme}>
+        {/* <RemainingInvites theme={theme}>
           You have {remainingInvites} invites remaining
-        </RemainingInvites>
+        </RemainingInvites> */}
         
         <InviteBox theme={theme}>
           <InviteLink theme={theme}>{inviteLink}</InviteLink>
