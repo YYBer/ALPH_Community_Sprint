@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 
-// Styled components for Leaderboard page
 export const PageContainer = styled.div`
   padding: 20px;
   max-width: 800px;
@@ -16,42 +15,6 @@ export const BannerSection = styled.div`
   flex-direction: column;
   align-items: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-`;
-
-export const Avatar = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 12px;
-  background-color: #4169E1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
-`;
-
-export const AvatarImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
-export const ViewCount = styled.div`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 8px 0 0 0;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-`;
-
-export const EyeIcon = styled.span`
-  margin-right: 4px;
 `;
 
 export const MainTitle = styled.h1`
@@ -76,79 +39,6 @@ export const SectionTitle = styled.h2`
   margin-bottom: 20px;
   font-weight: bold;
 `;
-
-export const LeaderboardTable = styled.div`
-  background-color: ${props => props.theme === 'dark' ? '#2c2c2c' : '#ffffff'};
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-`;
-
-export const TableHeader = styled.div`
-  display: grid;
-  grid-template-columns: 0.5fr 2fr 1fr;
-  padding: 15px;
-  background-color: ${props => props.theme === 'dark' ? '#3c3c3c' : '#f0f0f0'};
-  font-weight: bold;
-  border-bottom: 1px solid ${props => props.theme === 'dark' ? '#444' : '#ddd'};
-`;
-
-export const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: 0.5fr 2fr 1fr;
-  padding: 15px;
-  border-bottom: 1px solid ${props => props.theme === 'dark' ? '#444' : '#ddd'};
-  transition: background-color 0.2s;
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${props => props.theme === 'dark' ? '#3c3c3c' : '#f9f9f9'};
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-`;
-
-export const Rank = styled.div`
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-export const UserInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-export const TwitterHandle = styled.div`
-  font-weight: bold;
-  color: ${props => props.theme === 'dark' ? '#1da1f2' : '#1da1f2'};
-`;
-
-export const Score = styled.div`
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-`;
-
-export const LoadingSpinner = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  color: ${props => props.theme === 'dark' ? '#aaa' : '#666'};
-`;
-
-export const ErrorMessage = styled.div`
-  color: #e74c3c;
-  text-align: center;
-  padding: 20px;
-`;
-
-// New components for the redesigned leaderboard
 
 export const LeaderboardList = styled.div`
   background-color: ${props => props.theme === 'dark' ? '#2c2c2c' : '#ffffff'};
@@ -196,22 +86,6 @@ export const RankCircle = styled.div`
   flex-shrink: 0;
 `;
 
-export const CreatorAvatar = styled.div`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #ddd;
-  margin-right: 16px;
-  overflow: hidden;
-  flex-shrink: 0;
-`;
-
-export const CreatorImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
 export const CreatorInfo = styled.div`
   flex: 1;
 `;
@@ -241,7 +115,71 @@ export const ChevronIcon = styled.span`
   font-size: 20px;
 `;
 
-// Helper function to format large numbers with commas
-export const formatNumber = (num) => {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
+export const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: ${props => props.theme === 'dark' ? '#aaa' : '#666'};
+`;
+
+export const ErrorMessage = styled.div`
+  color: #e74c3c;
+  text-align: center;
+  padding: 20px;
+`;
+
+// Commented out styles kept for future reference
+/*
+export const Avatar = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  background-color: #4169E1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+`;
+
+export const AvatarImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+export const ViewCount = styled.div`
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 8px 0 0 0;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+`;
+
+export const EyeIcon = styled.span`
+  margin-right: 4px;
+`;
+
+export const CreatorAvatar = styled.div`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #ddd;
+  margin-right: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+`;
+
+export const CreatorImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+*/
