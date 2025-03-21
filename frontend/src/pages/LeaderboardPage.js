@@ -104,7 +104,7 @@ function LeaderboardPage({ theme, telegramUser }) {
   return (
     <PageContainer>
       <BannerSection>
-        <MainTitle>Rankify: Post, Compete, Fun!</MainTitle>
+        <MainTitle>Post, Compete, Fun!</MainTitle>
         <SubTitle>
           Check out the most active and popular Ambassadors in Alephium on this leaderboard!
         </SubTitle>

@@ -197,7 +197,7 @@ function InvitePage({ theme, telegramUser }) {
         </InviteBox>
       </Card>
       
-      <Card theme={theme}>
+      {/* <Card theme={theme}>
         <Title theme={theme} style={{ fontSize: '20px', marginBottom: '15px' }}>
           Your Referrals
         </Title>
@@ -220,7 +220,7 @@ function InvitePage({ theme, telegramUser }) {
             )}
           </ReferralsList>
         )}
-      </Card>
+      </Card> */}
     </PageContainer>
   );
 }
