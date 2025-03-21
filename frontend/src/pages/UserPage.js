@@ -82,9 +82,17 @@ function UserPage({ theme = 'light', telegramUser }) {
             };
           });
           
-          // Sort by timestamp (newest first)
+          // 更健壮的排序方法
           formattedPosts.sort((a, b) => {
-            return new Date(b.timestamp) - new Date(a.timestamp);
+            // 确保时间戳存在
+            if (!a.timestamp || !b.timestamp) return 0;
+            
+            // 尝试将时间戳转换为数字（如果是 UNIX 时间戳格式）
+            const timeA = isNaN(Number(a.timestamp)) ? new Date(a.timestamp).getTime() : Number(a.timestamp);
+            const timeB = isNaN(Number(b.timestamp)) ? new Date(b.timestamp).getTime() : Number(b.timestamp);
+            
+            // 降序排列（最新的在前）
+            return timeB - timeA;
           });
           
           setUserPosts(formattedPosts);
