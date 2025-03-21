@@ -27,32 +27,69 @@ function InvitePage({ theme, telegramUser }) {
   const [remainingInvites, setRemainingInvites] = useState(3);
   const [referrals, setReferrals] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState('');
 
   useEffect(() => {
-    // Generate invite link based on user
-    if (telegramUser) {
-      // In a real app, this would come from your backend
-      // For MVP, we'll create one locally
-      const link = `https://t.me/Alph_Rankify_Bot?start=ref_${telegramUser.id || '123456'}`;
-      setInviteLink(link);
+    // Get the user's ID from the Checkboard sheet in Google Sheets
+    const fetchUserData = async () => {
+      if (telegramUser) {
+        setIsLoading(true);
+        try {
+          // Get the TelegramName from telegramUser
+          const telegramName = telegramUser.username || '';
+          
+          // Fetch user data from the Checkboard sheet in Google Sheets
+          const response = await axios.get(
+            `${SHEETS_API_URL}/${SHEET_ID}/values/Checkboard!A2:C`,
+            {
+              params: {
+                key: API_KEY
+              }
+            }
+          );
+          
+          const rows = response.data.values || [];
+          // Find the user by TelegramName (column B, index 1)
+          const userRow = rows.find(row => row.length >= 2 && row[1] === telegramName);
+          
+          if (userRow) {
+            // UserID is in column A (index 0)
+            const fetchedUserId = userRow[0];
+            setUserId(fetchedUserId);
+            
+            // Generate invite link with the UserID from Checkboard
+            const link = `https://t.me/Alph_Rankify_Bot?start=${fetchedUserId}`;
+            setInviteLink(link);
+            
+            // Now fetch referral data
+            fetchUserReferralData(fetchedUserId);
+          } else {
+            // User not found in Checkboard sheet
+            console.log('User not found in Checkboard sheet');
+            setInviteLink(`https://t.me/Alph_Rankify_Bot?start=default`);
+            setIsLoading(false);
+          }
+        } catch (error) {
+          console.error('Error fetching user data from Checkboard:', error);
+          setInviteLink(`https://t.me/Alph_Rankify_Bot?start=default`);
+          setIsLoading(false);
+        }
+      } else {
+        // Default link for demo purposes
+        setInviteLink('https://t.me/Alph_Rankify_Bot?start=default');
+        fetchUserReferralData();
+      }
+    };
 
-      // Fetch remaining invites and referrals
-      fetchUserReferralData(telegramUser.id);
-    } else {
-      // Default link for demo purposes
-      setInviteLink('https://t.me/Alph_Rankify_Bot?start=ref_123456');
-      fetchUserReferralData();
-    }
+    fetchUserData();
   }, [telegramUser]);
 
-  const fetchUserReferralData = async (userId) => {
+  const fetchUserReferralData = async (fetchedUserId) => {
     setIsLoading(true);
     
     try {
-      // For a real app, we would fetch from the Referral sheet
-      // For now, we'll use sample data but structure it as if from the API
-      if (userId) {
-        // In a real implementation, you would query your Google Sheet for referrals
+      if (fetchedUserId) {
+        // In a real implementation, query your Google Sheet for referrals
         const response = await axios.get(
           `${SHEETS_API_URL}/${SHEET_ID}/values/Referrals!A2:C`,
           {
@@ -63,19 +100,18 @@ function InvitePage({ theme, telegramUser }) {
         );
         
         const rows = response.data.values || [];
-        const userReferrals = rows.filter(row => row[0] === userId);
+        const userReferrals = rows.filter(row => row[0] === fetchedUserId);
         
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // Format the referrals data
+        const formattedReferrals = userReferrals.map(row => {
+          return {
+            username: row[1] || 'Unknown User',
+            points: parseInt(row[2]) || 0
+          };
+        });
         
-        // Mock data - in a real app this would come from the API response
-        const mockReferrals = [
-          { username: 'user1', points: 25 },
-          { username: 'user2', points: 10 }
-        ];
-        
-        setReferrals(mockReferrals);
-        setRemainingInvites(3 - mockReferrals.length);
+        setReferrals(formattedReferrals);
+        setRemainingInvites(Math.max(0, 3 - formattedReferrals.length));
       } else {
         // Sample data for users not logged in
         setReferrals([]);
@@ -102,12 +138,29 @@ function InvitePage({ theme, telegramUser }) {
   const handleShareLink = () => {
     // For Telegram Mini Apps, use the Telegram Web App API to share
     if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.switchInlineQuery(
-        `Join our competition using my referral link: ${inviteLink}`,
-        ['users']
-      );
+      try {
+        // Use openTelegramLink instead of switchInlineQuery
+        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent('Join our competition using my referral link!')}`;
+        window.Telegram.WebApp.openLink(shareUrl);
+      } catch (error) {
+        console.error('Error sharing link:', error);
+        alert('Failed to share link. Please try copying instead.');
+      }
     } else {
-      alert('Telegram WebApp is not available in this context. In a real app, this would share to Telegram.');
+      // Fallback for non-Telegram environments
+      if (navigator.share) {
+        navigator.share({
+          title: 'Join our competition!',
+          text: 'Join our competition using my referral link!',
+          url: inviteLink,
+        })
+        .catch(err => {
+          console.error('Share failed:', err);
+          alert('Failed to share. Please copy the link instead.');
+        });
+      } else {
+        alert('Sharing not available. Please copy the link instead.');
+      }
     }
   };
 
