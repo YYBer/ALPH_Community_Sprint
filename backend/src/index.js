@@ -114,6 +114,7 @@ const addSubmission = async (userId, userName, submissionType, handle, postUrl) 
 };
 
 // Get user statistics
+// Get user statistics including rank
 const getUserStats = async (userId) => {
   try {
     const doc = await connectToSheets();
@@ -134,42 +135,77 @@ const getUserStats = async (userId) => {
     // Load all rows
     const rows = await detailsSheet.getRows();
     
-    // Filter rows for this user
-    const userSubmissions = rows.filter(row => {
-      return row.get('UserID') === userId.toString();
+    // Create a map to store all users' data for ranking
+    const userMap = new Map();
+    
+    rows.forEach(row => {
+      const currentUserId = row.get('UserID');
+      const submissionType = row.get('SubmissionType');
+      const reviewStatus = row.get('ReviewStatus');
+      const score = parseInt(row.get('Score')) || 0;
+      
+      if (!currentUserId) return;
+      
+      if (!userMap.has(currentUserId)) {
+        userMap.set(currentUserId, {
+          userId: currentUserId,
+          totalScore: 0,
+          totalSubmissions: 0,
+          twitterSubmissions: 0,
+          youtubeSubmissions: 0,
+          lastSubmission: 'None'
+        });
+      }
+      
+      const user = userMap.get(currentUserId);
+      user.totalSubmissions++;
+      
+      // Only count approved scores
+      if (reviewStatus === 'Approved') {
+        user.totalScore += score;
+      }
+      
+      if (submissionType === 'twitter') user.twitterSubmissions++;
+      if (submissionType === 'youtube') user.youtubeSubmissions++;
+      
+      // Update last submission timestamp
+      const timestamp = row.get('Timestamp');
+      if (timestamp && (user.lastSubmission === 'None' || new Date(timestamp) > new Date(user.lastSubmission))) {
+        user.lastSubmission = timestamp;
+      }
     });
     
-    if (userSubmissions.length === 0) {
+    // Convert to array and sort by score to determine rankings
+    const allUsers = Array.from(userMap.values())
+      .filter(user => user.totalSubmissions > 0) // Only users with submissions
+      .sort((a, b) => b.totalScore - a.totalScore);
+    
+    // Find current user's rank
+    const currentUserData = userMap.get(userId.toString());
+    
+    if (!currentUserData || currentUserData.totalSubmissions === 0) {
       return {
         totalSubmissions: 0,
         totalScore: 0,
         twitterSubmissions: 0,
         youtubeSubmissions: 0,
-        lastSubmission: 'None'
+        lastSubmission: 'None',
+        rank: null,
+        totalUsers: allUsers.length
       };
     }
     
-    let totalScore = 0;
-    let twitterCount = 0;
-    let youtubeCount = 0;
-    
-    userSubmissions.forEach(row => {
-      // Only count approved scores
-      if (row.get('ReviewStatus') === 'Approved') {
-        totalScore += parseInt(row.get('Score')) || 0;
-      }
-      
-      const submissionType = row.get('SubmissionType');
-      if (submissionType === 'twitter') twitterCount++;
-      if (submissionType === 'youtube') youtubeCount++;
-    });
+    // Find rank (1-indexed)
+    const rank = allUsers.findIndex(user => user.userId === userId.toString()) + 1;
     
     return {
-      totalSubmissions: userSubmissions.length,
-      totalScore,
-      twitterSubmissions: twitterCount,
-      youtubeSubmissions: youtubeCount,
-      lastSubmission: userSubmissions[userSubmissions.length - 1]?.get('Timestamp') || 'None'
+      totalSubmissions: currentUserData.totalSubmissions,
+      totalScore: currentUserData.totalScore,
+      twitterSubmissions: currentUserData.twitterSubmissions,
+      youtubeSubmissions: currentUserData.youtubeSubmissions,
+      lastSubmission: currentUserData.lastSubmission,
+      rank: rank > 0 ? rank : null,
+      totalUsers: allUsers.length
     };
     
   } catch (error) {
@@ -210,14 +246,59 @@ const isDuplicateSubmission = async (userId, postUrl) => {
 
 // Bot commands
 bot.start((ctx) => {
+  const keyboard = {
+    inline_keyboard: [
+      [{
+        text: '🏆 Open Leaderboard',
+        web_app: { url: process.env.WEBAPP_URL } // Add your mini app URL to .env file
+      }],
+      [{
+        text: '📊 My Stats',
+        callback_data: 'mystats'
+      }]
+    ]
+  };
+
   ctx.reply(
     'Welcome to the ALPH Community Sprint! 🎉\n\n' +
     'Share your Twitter or YouTube posts with me to participate.\n\n' +
     'Supported platforms:\n' +
     '• Twitter/X posts\n' +
     '• YouTube videos\n\n' +
-    'Just send me the URL directly!'
+    'Just send me the URL directly!\n\n' +
+    '📱 Use the buttons below to check the leaderboard or your stats:',
+    { reply_markup: keyboard }
   );
+});
+
+// Add callback query handler for the stats button
+bot.action('mystats', async (ctx) => {
+  await ctx.answerCbQuery();
+  
+  const userId = ctx.from.id;
+  
+  try {
+    const stats = await getUserStats(userId);
+    
+    if (!stats) {
+      return ctx.reply('❌ Sorry, there was an issue fetching your stats. Please try again later.');
+    }
+    
+    const rankText = stats.rank ? `🏆 Your Rank: #${stats.rank}` : '🏆 Your Rank: Unranked';
+    
+    ctx.reply(
+      `📊 Your Stats:\n\n` +
+      `${rankText}\n` +
+      `🎯 Total Score: ${stats.totalScore}\n` +
+      `📝 Total Submissions: ${stats.totalSubmissions}\n` +
+      `🐦 Twitter Posts: ${stats.twitterSubmissions}\n` +
+      `📺 YouTube Videos: ${stats.youtubeSubmissions}\n` +
+      `⏰ Last Submission: ${stats.lastSubmission}`
+    );
+  } catch (error) {
+    console.error('Error in mystats callback:', error);
+    ctx.reply('❌ Sorry, there was an issue fetching your stats. Please try again later.');
+  }
 });
 
 bot.help((ctx) => {
@@ -230,6 +311,7 @@ bot.help((ctx) => {
 });
 
 // Handle my stats command
+// Handle my stats command
 bot.command('mystats', async (ctx) => {
   const userId = ctx.from.id;
   
@@ -240,13 +322,35 @@ bot.command('mystats', async (ctx) => {
       return ctx.reply('❌ Sorry, there was an issue fetching your stats. Please try again later.');
     }
     
+    let rankText;
+    if (stats.rank) {
+      rankText = `🏆 Your Rank: #${stats.rank} out of ${stats.totalUsers}`;
+    } else {
+      rankText = `🏆 Your Rank: Unranked (no approved submissions yet)`;
+    }
+    
+    const keyboard = {
+      inline_keyboard: [
+        [{
+          text: '🏆 View Full Leaderboard',
+          web_app: { url: process.env.WEBAPP_URL }
+        }],
+        [{
+          text: '👤 View My Profile',
+          web_app: { url: `${process.env.WEBAPP_URL}/user/${userId}` }
+        }]
+      ]
+    };
+    
     ctx.reply(
       `📊 Your Stats:\n\n` +
+      `${rankText}\n` +
       `🎯 Total Score: ${stats.totalScore}\n` +
       `📝 Total Submissions: ${stats.totalSubmissions}\n` +
       `🐦 Twitter Posts: ${stats.twitterSubmissions}\n` +
       `📺 YouTube Videos: ${stats.youtubeSubmissions}\n` +
-      `⏰ Last Submission: ${stats.lastSubmission}`
+      `⏰ Last Submission: ${stats.lastSubmission}`,
+      { reply_markup: keyboard }
     );
   } catch (error) {
     console.error('Error in mystats command:', error);
