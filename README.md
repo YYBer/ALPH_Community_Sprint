@@ -1,28 +1,38 @@
 # ALPH_Community_Sprint
 
-### Backend:
+## Backend:
+```
+npm i
+```
 ```
 cd backend
 npm start
 ```
-### or run it in the docker
+
+### .env
 ```
-docker build -t competition-recorder-backend .
-docker run --env-file .env -d competition-recorder
-```
-stop the docker
-```
-docker ps
-docker stop <container_id>
-docker rm <container_id>
+BOT_TOKEN=
+WEBAPP_URL=
+SHEET_ID=
+GOOGLE_SERVICE_ACCOUNT_EMAIL=
+GOOGLE_PRIVATE_KEY=
 ```
    
 Bot:@ALPH_Community_Sprint_Bot
 
 -----------
 
-### Frontend:
+## Frontend:
+```
+npm i
+```
 ```
 cd frontend
 npm start
+```
+### .env
+```
+REACT_APP_SHEET_ID=
+REACT_APP_GOOGLE_API_KEY=
+REACT_APP_API_BASE_URL=
 ```
