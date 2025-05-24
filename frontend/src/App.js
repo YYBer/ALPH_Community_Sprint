@@ -4,7 +4,6 @@ import styled from 'styled-components';
 
 // Import our page components
 import LeaderboardPage from './pages/LeaderboardPage';
-import InvitePage from './pages/InvitePage';
 import UserPage from './pages/UserPage';
 
 // Initialize Telegram WebApp
@@ -23,15 +22,15 @@ const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
-  color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
-  background-color: ${props => props.themeMode === 'dark' ? '#1c1c1c' : '#f5f5f5'};
+  color: ${props => props.tgTheme === 'dark' ? '#fff' : '#000'};
+  background-color: ${props => props.tgTheme === 'dark' ? '#1c1c1c' : '#f5f5f5'};
 `;
 
 const NavBar = styled.nav`
   display: flex;
   justify-content: space-around;
   padding: 15px 0;
-  background-color: ${props => props.themeMode === 'dark' ? '#2c2c2c' : '#ffffff'};
+  background-color: ${props => props.tgTheme === 'dark' ? '#2c2c2c' : '#ffffff'};
   position: fixed;
   bottom: 0;
   width: 100%;
@@ -39,16 +38,25 @@ const NavBar = styled.nav`
 `;
 
 const NavLink = styled(Link)`
-  color: ${props => props.active ? '#0088cc' : (props.themeMode === 'dark' ? '#aaa' : '#666')};
+  color: ${props => props.active ? '#0088cc' : (props.tgTheme === 'dark' ? '#aaa' : '#666')};
   text-decoration: none;
   font-weight: ${props => props.active ? 'bold' : 'normal'};
   padding: 10px 15px;
   border-radius: 5px;
   transition: background-color 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
 
   &:hover {
-    background-color: ${props => props.themeMode === 'dark' ? '#3c3c3c' : '#eaeaea'};
+    background-color: ${props => props.tgTheme === 'dark' ? '#3c3c3c' : '#eaeaea'};
   }
+`;
+
+const NavIcon = styled.span`
+  font-size: 18px;
 `;
 
 const ContentArea = styled.main`
@@ -56,6 +64,27 @@ const ContentArea = styled.main`
   overflow-y: auto;
   padding: 20px;
   padding-bottom: 80px; // Space for fixed navbar
+`;
+
+const Header = styled.header`
+  background-color: ${props => props.tgTheme === 'dark' ? '#2c2c2c' : '#ffffff'};
+  padding: 15px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0;
+`;
+
+const HeaderTitle = styled.h1`
+  margin: 0;
+  font-size: 20px;
+  text-align: center;
+  color: ${props => props.tgTheme === 'dark' ? '#ffffff' : '#000000'};
+`;
+
+const HeaderSubtitle = styled.p`
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  text-align: center;
+  color: ${props => props.tgTheme === 'dark' ? '#aaa' : '#666'};
 `;
 
 function App() {
@@ -72,6 +101,14 @@ function App() {
       // Set theme based on Telegram color scheme
       setTheme(webApp.colorScheme || 'light');
     }
+
+    // Detect current page from URL
+    const path = window.location.pathname;
+    if (path.includes('/user/')) {
+      setActivePage('profile');
+    } else {
+      setActivePage('leaderboard');
+    }
   }, []);
 
   // Get user info from Telegram
@@ -79,40 +116,39 @@ function App() {
 
   return (
     <Router>
-      <AppContainer themeMode={theme} data-theme={theme}>
+      <AppContainer tgTheme={theme}>
+        <Header tgTheme={theme}>
+          <HeaderTitle tgTheme={theme}>ALPH Community Sprint</HeaderTitle>
+          <HeaderSubtitle tgTheme={theme}>Share your content and compete!</HeaderSubtitle>
+        </Header>
+
         <ContentArea>
           <Routes>
             <Route path="/" element={<LeaderboardPage theme={theme} telegramUser={telegramUser} />} />
-            <Route path="/invite" element={<InvitePage theme={theme} telegramUser={telegramUser} />} />
             <Route path="/user/:userId" element={<UserPage theme={theme} telegramUser={telegramUser} />} />
           </Routes>
         </ContentArea>
 
-        <NavBar themeMode={theme} data-theme={theme}>
+        <NavBar tgTheme={theme}>
           <NavLink 
             to="/" 
             active={activePage === 'leaderboard' ? 1 : 0}
-            themeMode={theme}
+            tgTheme={theme}
             onClick={() => setActivePage('leaderboard')}
           >
+            <NavIcon>🏆</NavIcon>
             Leaderboard
           </NavLink>
-          <NavLink 
-            to="/invite" 
-            active={activePage === 'invite' ? 1 : 0}
-            themeMode={theme}
-            onClick={() => setActivePage('invite')}
-          >
-            Invite
-          </NavLink>
+          
           {telegramUser && (
             <NavLink 
               to={`/user/${telegramUser.id}`} 
               active={activePage === 'profile' ? 1 : 0}
-              themeMode={theme}
+              tgTheme={theme}
               onClick={() => setActivePage('profile')}
             >
-              My Posts
+              <NavIcon>👤</NavIcon>
+              My Profile
             </NavLink>
           )}
         </NavBar>

@@ -67,29 +67,6 @@ const apiService = {
       throw error;
     }
   },
-
-  // Get user referrals
-  getUserReferrals: async (userId) => {
-    try {
-      // In production, this would be an API call to your backend
-      // For MVP, we'll simulate the response
-      
-      // Simulated API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock data
-      return {
-        remainingInvites: 1,
-        referrals: [
-          { username: 'user1', points: 25 },
-          { username: 'user2', points: 10 }
-        ]
-      };
-    } catch (error) {
-      console.error('Error fetching referrals:', error);
-      throw error;
-    }
-  }
 };
 
 export default apiService;

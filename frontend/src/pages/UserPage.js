@@ -1,197 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import axios from 'axios';
+import SimpleTweetEmbed from '../components/SimpleTweetEmbed';
+import {
+  PageContainer,
+  Title,
+  Subtitle,
+  UserInfoCard,
+  UserStats,
+  StatItem,
+  StatValue,
+  StatLabel,
+  PlatformStats,
+  PlatformStatItem,
+  PlatformIcon,
+  PlatformCount,
+  PlatformLabel,
+  PostsFilter,
+  FilterButton,
+  PostsList,
+  PostCard,
+  PostHeader,
+  PostPlatform,
+  PostLink,
+  ScoreBadge,
+  PreviewContainer,
+  YouTubeEmbed,
+  LoadingSpinner,
+  ErrorMessage,
+  TwitterHandleDisplay,
+  NoDataMessage
+} from './UserPageStyles';
 
 // API endpoint for Google Sheets
 const SHEETS_API_URL = 'https://sheets.googleapis.com/v4/spreadsheets';
 const SHEET_ID = process.env.REACT_APP_SHEET_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 
-// Styled components
-const PageContainer = styled.div`
-  padding: 20px;
-`;
+const YouTubePreview = ({ url, theme }) => {
+  const getYouTubeId = (url) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
 
-const Title = styled.h1`
-  font-size: 24px;
-  margin-bottom: 10px;
-  color: ${props => props.theme === 'dark' ? '#ffffff' : '#000000'};
-  text-align: center;
-`;
-
-const Subtitle = styled.h2`
-  font-size: 18px;
-  margin-bottom: 20px;
-  color: ${props => props.theme === 'dark' ? '#aaaaaa' : '#666666'};
-  text-align: center;
-`;
-
-const UserInfoCard = styled.div`
-  background-color: ${props => props.theme === 'dark' ? '#2c2c2c' : '#ffffff'};
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const UserStats = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-  width: 100%;
-  margin: 15px 0;
-`;
-
-const StatItem = styled.div`
-  text-align: center;
-  background-color: ${props => props.theme === 'dark' ? '#3c3c3c' : '#f8f9fa'};
-  padding: 15px;
-  border-radius: 8px;
-`;
-
-const StatValue = styled.div`
-  font-size: 24px;
-  font-weight: bold;
-  color: ${props => props.theme === 'dark' ? '#ffffff' : '#000000'};
-`;
-
-const StatLabel = styled.div`
-  font-size: 14px;
-  color: ${props => props.theme === 'dark' ? '#aaaaaa' : '#666666'};
-  margin-top: 5px;
-`;
-
-const PlatformStats = styled.div`
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid ${props => props.theme === 'dark' ? '#444' : '#eee'};
-`;
-
-const PlatformStatItem = styled.div`
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const PlatformIcon = styled.div`
-  font-size: 20px;
-  margin-bottom: 5px;
-`;
-
-const PlatformCount = styled.div`
-  font-size: 16px;
-  font-weight: bold;
-  color: ${props => props.theme === 'dark' ? '#ffffff' : '#000000'};
-`;
-
-const PlatformLabel = styled.div`
-  font-size: 12px;
-  color: ${props => props.theme === 'dark' ? '#aaa' : '#666'};
-`;
-
-const PostsFilter = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  background-color: ${props => props.theme === 'dark' ? '#2c2c2c' : '#ffffff'};
-  border-radius: 10px;
-  padding: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const FilterButton = styled.button`
-  background-color: ${props => props.active ? '#0088cc' : 'transparent'};
-  color: ${props => props.active ? '#ffffff' : (props.theme === 'dark' ? '#aaa' : '#666')};
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-weight: ${props => props.active ? 'bold' : 'normal'};
-  font-size: 14px;
-
-  &:hover {
-    background-color: ${props => props.active ? '#0088cc' : (props.theme === 'dark' ? '#3c3c3c' : '#f0f0f0')};
-  }
-`;
-
-const PostsList = styled.div`
-  margin-top: 20px;
-`;
-
-const PostCard = styled.div`
-  background-color: ${props => props.theme === 'dark' ? '#2c2c2c' : '#ffffff'};
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid ${props => 
-    props.platform === 'twitter' ? '#1da1f2' : 
-    props.platform === 'youtube' ? '#ff0000' : '#ccc'};
-`;
-
-const PostHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: ${props => props.theme === 'dark' ? '#aaaaaa' : '#666666'};
-`;
-
-const PostPlatform = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-weight: bold;
-  color: ${props => 
-    props.platform === 'twitter' ? '#1da1f2' : 
-    props.platform === 'youtube' ? '#ff0000' : '#666'};
-`;
-
-const PostLink = styled.a`
-  display: block;
-  margin-top: 10px;
-  color: #0088cc;
-  text-decoration: none;
-  word-break: break-all;
+  const videoId = getYouTubeId(url);
   
-  &:hover {
-    text-decoration: underline;
+  if (!videoId) {
+    return (
+      <YouTubeEmbed theme={theme}>
+        📺 Invalid YouTube URL
+      </YouTubeEmbed>
+    );
   }
-`;
 
-const ScoreBadge = styled.div`
-  background-color: ${props => props.theme === 'dark' ? '#3c3c3c' : '#f0f0f0'};
-  padding: 5px 10px;
-  border-radius: 15px;
-  font-weight: bold;
-  color: ${props => props.status === 'Approved' ? '#27ae60' : 
-    props.status === 'Rejected' ? '#e74c3c' : 
-    props.status === 'Pending' ? '#f39c12' : '#666'};
-`;
-
-const LoadingSpinner = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  color: ${props => props.theme === 'dark' ? '#aaa' : '#666'};
-`;
-
-const ErrorMessage = styled.div`
-  color: #e74c3c;
-  text-align: center;
-  padding: 20px;
-`;
+  return (
+    <YouTubeEmbed theme={theme}>
+      <iframe
+        width="100%"
+        height="100%"
+        src={`https://www.youtube.com/embed/${videoId}`}
+        title="YouTube video player"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        style={{ borderRadius: '8px' }}
+      />
+    </YouTubeEmbed>
+  );
+};
 
 function UserPage({ theme, telegramUser }) {
   const { userId } = useParams();
@@ -200,12 +77,14 @@ function UserPage({ theme, telegramUser }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [postFilter, setPostFilter] = useState('all');
+
   const isCurrentUser = telegramUser && telegramUser.id.toString() === userId;
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // For MVP, we're using public Google Sheets API
+        console.log('Fetching user data for userId:', userId);
+        
         const response = await axios.get(
           `${SHEETS_API_URL}/${SHEET_ID}/values/Details!A2:I`,
           {
@@ -215,12 +94,13 @@ function UserPage({ theme, telegramUser }) {
           }
         );
 
-        // Process the data
         const rows = response.data.values || [];
+        console.log('Total rows fetched:', rows.length);
+        
         const userRows = rows.filter(row => row[0] === userId);
+        console.log('User rows found:', userRows.length);
         
         if (userRows.length > 0) {
-          // Extract user info from first post
           const telegramName = userRows[0][1];
           let twitterHandle = '';
           
@@ -234,9 +114,23 @@ function UserPage({ theme, telegramUser }) {
           let totalScore = 0;
           let twitterSubmissions = 0;
           let youtubeSubmissions = 0;
+          let approvedPosts = 0;
+          let pendingPosts = 0;
+          let rejectedPosts = 0;
           
           userRows.forEach(row => {
-            totalScore += parseInt(row[7]) || 0;
+            const status = row[8] || 'Pending';
+            const score = parseInt(row[7]) || 0;
+            
+            if (status === 'Approved') {
+              totalScore += score;
+              approvedPosts++;
+            } else if (status === 'Rejected') {
+              rejectedPosts++;
+            } else {
+              pendingPosts++;
+            }
+            
             if (row[2] === 'twitter') twitterSubmissions++;
             if (row[2] === 'youtube') youtubeSubmissions++;
           });
@@ -248,11 +142,15 @@ function UserPage({ theme, telegramUser }) {
             totalScore,
             totalPosts: userRows.length,
             twitterSubmissions,
-            youtubeSubmissions
+            youtubeSubmissions,
+            approvedPosts,
+            pendingPosts,
+            rejectedPosts
           });
           
           // Format posts data
-          const formattedPosts = userRows.map(row => ({
+          const formattedPosts = userRows.map((row, index) => ({
+            id: `${userId}-${index}`,
             userId: row[0],
             telegramName: row[1],
             submissionType: row[2],
@@ -293,6 +191,10 @@ function UserPage({ theme, telegramUser }) {
         return userPosts.filter(post => post.submissionType === 'twitter');
       case 'youtube':
         return userPosts.filter(post => post.submissionType === 'youtube');
+      case 'approved':
+        return userPosts.filter(post => post.status === 'Approved');
+      case 'pending':
+        return userPosts.filter(post => post.status === 'Pending');
       default:
         return userPosts;
     }
@@ -318,6 +220,10 @@ function UserPage({ theme, telegramUser }) {
       default:
         return 'Post';
     }
+  };
+
+  const togglePreview = (postId) => {
+    // 移除预览切换功能 - 直接显示所有预览
   };
 
   if (loading) {
@@ -355,9 +261,9 @@ function UserPage({ theme, telegramUser }) {
       <UserInfoCard theme={theme}>
         <Subtitle theme={theme}>@{userInfo.telegramName}</Subtitle>
         {userInfo.twitterHandle && (
-          <div style={{ color: '#1da1f2', marginBottom: '15px' }}>
+          <TwitterHandleDisplay>
             🐦 @{userInfo.twitterHandle}
-          </div>
+          </TwitterHandleDisplay>
         )}
         
         <UserStats>
@@ -381,6 +287,16 @@ function UserPage({ theme, telegramUser }) {
             <PlatformIcon>📺</PlatformIcon>
             <PlatformCount theme={theme}>{userInfo.youtubeSubmissions}</PlatformCount>
             <PlatformLabel theme={theme}>YouTube</PlatformLabel>
+          </PlatformStatItem>
+          <PlatformStatItem>
+            <PlatformIcon>✅</PlatformIcon>
+            <PlatformCount theme={theme}>{userInfo.approvedPosts}</PlatformCount>
+            <PlatformLabel theme={theme}>Approved</PlatformLabel>
+          </PlatformStatItem>
+          <PlatformStatItem>
+            <PlatformIcon>⏳</PlatformIcon>
+            <PlatformCount theme={theme}>{userInfo.pendingPosts}</PlatformCount>
+            <PlatformLabel theme={theme}>Pending</PlatformLabel>
           </PlatformStatItem>
         </PlatformStats>
       </UserInfoCard>
@@ -411,12 +327,26 @@ function UserPage({ theme, telegramUser }) {
         >
           📺 YouTube ({userInfo.youtubeSubmissions})
         </FilterButton>
+        <FilterButton 
+          active={postFilter === 'approved'}
+          theme={theme}
+          onClick={() => setPostFilter('approved')}
+        >
+          ✅ Approved ({userInfo.approvedPosts})
+        </FilterButton>
+        <FilterButton 
+          active={postFilter === 'pending'}
+          theme={theme}
+          onClick={() => setPostFilter('pending')}
+        >
+          ⏳ Pending ({userInfo.pendingPosts})
+        </FilterButton>
       </PostsFilter>
       
       <PostsList>
         {filteredPosts.length > 0 ? (
-          filteredPosts.map((post, index) => (
-            <PostCard key={index} theme={theme} platform={post.submissionType}>
+          filteredPosts.map((post) => (
+            <PostCard key={post.id} theme={theme} platform={post.submissionType}>
               <PostHeader theme={theme}>
                 <PostPlatform platform={post.submissionType}>
                   {getPlatformIcon(post.submissionType)}
@@ -429,6 +359,7 @@ function UserPage({ theme, telegramUser }) {
                    'Pending Review'}
                 </ScoreBadge>
               </PostHeader>
+              
               <PostLink 
                 href={post.postUrl} 
                 target="_blank" 
@@ -436,13 +367,33 @@ function UserPage({ theme, telegramUser }) {
               >
                 {post.postUrl}
               </PostLink>
+              
+              <PreviewContainer theme={theme}>
+                {post.submissionType === 'twitter' ? (
+                  <SimpleTweetEmbed 
+                    tweetUrl={post.postUrl} 
+                    theme={theme}
+                  />
+                ) : post.submissionType === 'youtube' ? (
+                  <YouTubePreview 
+                    url={post.postUrl}
+                    theme={theme}
+                  />
+                ) : (
+                  <NoDataMessage theme={theme}>
+                    Preview not available for this content type
+                  </NoDataMessage>
+                )}
+              </PreviewContainer>
             </PostCard>
           ))
         ) : (
-          <div style={{ textAlign: 'center', padding: '20px', color: theme === 'dark' ? '#aaa' : '#666' }}>
+          <NoDataMessage theme={theme}>
             {postFilter === 'all' ? 'No submissions yet.' : 
+             postFilter === 'approved' ? 'No approved submissions yet.' :
+             postFilter === 'pending' ? 'No pending submissions.' :
              `No ${getPlatformName(postFilter)} submissions yet.`}
-          </div>
+          </NoDataMessage>
         )}
       </PostsList>
     </PageContainer>

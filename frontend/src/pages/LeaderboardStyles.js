@@ -2,61 +2,41 @@ import styled from 'styled-components';
 
 export const PageContainer = styled.div`
   padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
 `;
 
-export const BannerSection = styled.div`
-  background: linear-gradient(135deg, #9370DB, #8A2BE2);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-`;
-
-export const MainTitle = styled.h1`
-  font-size: 32px;
-  color: white;
-  margin: 10px 0;
-  text-align: center;
-  font-weight: bold;
-`;
-
-export const SubTitle = styled.p`
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-  text-align: center;
-  max-width: 600px;
-`;
-
-export const SectionTitle = styled.h2`
-  font-size: 28px;
-  color: #333;
+export const Title = styled.h1`
+  font-size: 24px;
   margin-bottom: 20px;
-  font-weight: bold;
+  color: ${props => props.theme === 'dark' ? '#ffffff' : '#000000'};
+  text-align: center;
 `;
 
-export const LeaderboardList = styled.div`
+export const LeaderboardTable = styled.div`
   background-color: ${props => props.theme === 'dark' ? '#2c2c2c' : '#ffffff'};
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-export const LeaderItem = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid ${props => props.theme === 'dark' ? '#444' : '#eee'};
-  cursor: pointer;
+export const TableHeader = styled.div`
+  display: grid;
+  grid-template-columns: 0.5fr 2fr 1fr;
+  padding: 15px;
+  background-color: ${props => props.theme === 'dark' ? '#3c3c3c' : '#f0f0f0'};
+  font-weight: bold;
+  border-bottom: 1px solid ${props => props.theme === 'dark' ? '#444' : '#ddd'};
+`;
+
+export const TableRow = styled.div`
+  display: grid;
+  grid-template-columns: 0.5fr 2fr 1fr;
+  padding: 15px;
+  border-bottom: 1px solid ${props => props.theme === 'dark' ? '#444' : '#ddd'};
   transition: background-color 0.2s;
+  cursor: pointer;
 
   &:hover {
-    background-color: ${props => props.theme === 'dark' ? '#3c3c3c' : '#f9f9f9'};
+    background-color: ${props => props.theme === 'dark' ? '#3c3c3c' : '#f5f5f5'};
   }
 
   &:last-child {
@@ -64,55 +44,73 @@ export const LeaderItem = styled.div`
   }
 `;
 
-export const RankCircle = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: ${props => {
-    if (props.rank === 1) return '#FFD700';
-    if (props.rank === 2) return '#C0C0C0';
-    if (props.rank === 3) return '#CD7F32';
-    return '#E0E0E0';
-  }};
-  color: ${props => {
-    if (props.rank <= 3) return '#333';
-    return '#666';
-  }};
+export const ExpandedRow = styled.div`
+  grid-column: 1 / -1;
+  padding: 20px;
+  background-color: ${props => props.theme === 'dark' ? '#1c1c1c' : '#fafafa'};
+  border-top: 1px solid ${props => props.theme === 'dark' ? '#444' : '#eee'};
+`;
+
+export const Rank = styled.div`
+  font-weight: bold;
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  margin-right: 16px;
-  flex-shrink: 0;
-`;
-
-export const CreatorInfo = styled.div`
-  flex: 1;
-`;
-
-export const CreatorName = styled.div`
-  font-weight: bold;
   font-size: 18px;
-  color: ${props => props.theme === 'dark' ? '#ffffff' : '#333'};
-  margin-bottom: 4px;
 `;
 
-export const ScoreContainer = styled.div`
+export const UserInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const UserName = styled.div`
+  font-weight: bold;
+  color: ${props => props.theme === 'dark' ? '#ffffff' : '#000000'};
+  margin-bottom: 5px;
+`;
+
+export const UserHandles = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+`;
+
+export const Handle = styled.div`
+  font-size: 12px;
+  color: ${props => props.platform === 'twitter' ? '#1da1f2' : 
+    props.platform === 'youtube' ? '#ff0000' : '#666'};
   display: flex;
   align-items: center;
-  color: #888;
-  font-size: 16px;
+  gap: 5px;
 `;
 
-export const StarIcon = styled.span`
-  color: #FFD700;
-  margin-right: 4px;
+export const PlatformIcon = styled.span`
+  font-size: 14px;
 `;
 
-export const ChevronIcon = styled.span`
-  margin-left: 16px;
-  color: #ccc;
+export const SubmissionCounts = styled.div`
+  font-size: 11px;
+  color: ${props => props.theme === 'dark' ? '#aaa' : '#666'};
+  margin-top: 5px;
+`;
+
+export const Score = styled.div`
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+`;
+
+export const ScoreValue = styled.div`
   font-size: 20px;
+  color: ${props => props.theme === 'dark' ? '#ffffff' : '#000000'};
+`;
+
+export const ScoreLabel = styled.div`
+  font-size: 12px;
+  color: ${props => props.theme === 'dark' ? '#aaa' : '#666'};
 `;
 
 export const LoadingSpinner = styled.div`
@@ -129,57 +127,27 @@ export const ErrorMessage = styled.div`
   padding: 20px;
 `;
 
-// Commented out styles kept for future reference
-/*
-export const Avatar = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 12px;
-  background-color: #4169E1;
+export const FilterTabs = styled.div`
   display: flex;
   justify-content: center;
-  align-items: center;
   margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
+  background-color: ${props => props.theme === 'dark' ? '#2c2c2c' : '#ffffff'};
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-export const AvatarImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
+export const FilterTab = styled.button`
+  background-color: ${props => props.active ? '#0088cc' : 'transparent'};
+  color: ${props => props.active ? '#ffffff' : (props.theme === 'dark' ? '#aaa' : '#666')};
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: ${props => props.active ? 'bold' : 'normal'};
 
-export const ViewCount = styled.div`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 8px 0 0 0;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
+  &:hover {
+    background-color: ${props => props.active ? '#0088cc' : (props.theme === 'dark' ? '#3c3c3c' : '#f0f0f0')};
+  }
 `;
-
-export const EyeIcon = styled.span`
-  margin-right: 4px;
-`;
-
-export const CreatorAvatar = styled.div`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #ddd;
-  margin-right: 16px;
-  overflow: hidden;
-  flex-shrink: 0;
-`;
-
-export const CreatorImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-*/
