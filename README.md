@@ -1,9 +1,9 @@
-# Competition_Recorder
+# ALPH_Community_Sprint
 
 ### Backend:
 ```
 cd backend
-node src/index.js
+npm start
 ```
 ### or run it in the docker
 ```
@@ -17,7 +17,7 @@ docker stop <container_id>
 docker rm <container_id>
 ```
    
-Bot:@Alph_Rankify_Bot
+Bot:@ALPH_Community_Sprint_Bot
 
 -----------
 
@@ -26,5 +26,3 @@ Bot:@Alph_Rankify_Bot
 cd frontend
 npm start
 ```
-
-miniapp: t.me/Alph_Rankify_Bot/Ra01

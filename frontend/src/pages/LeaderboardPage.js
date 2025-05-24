@@ -176,7 +176,7 @@ function LeaderboardPage({ theme, telegramUser }) {
 
   return (
     <PageContainer>
-      <Title theme={theme}>ALPH Community Sprint Leaderboard</Title>
+      <Title theme={theme}>Leaderboard</Title>
       
       <FilterTabs theme={theme}>
         <FilterTab 
